@@ -10,6 +10,17 @@ class Header extends Component {
     current: 'home',
   };
 
+  componentDidMount(){
+    let path = this.props.history.location.pathname
+    console.log("Path is",path);
+    path=path.slice(1);
+    if(path=="")
+    {
+      path="home"
+    }
+    this.setState({current:path});
+  }
+
   handleClick = e => {
     console.log('click ', e);
     this.setState({ current: e.key });

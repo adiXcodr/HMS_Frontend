@@ -5,16 +5,15 @@ import Rooms from './components/Rooms';
 import Reps from './components/Reps';
 import Header from './components/Header';
 import "antd/dist/antd.css";
-
+import { createBrowserHistory } from 'history';
+const history = createBrowserHistory();
 class App extends Component {
-
- 
 
   render() {
     return (
-    <Router>
+    <Router history={history}>
         <div>
-          <Header/>
+          <Header history={history}/>
           <Switch>
               <Route exact path='/' component={Boarders} />
               <Route path='/rooms' component={Rooms} />

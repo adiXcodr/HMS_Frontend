@@ -17,8 +17,8 @@ export const get_all_boarders = async () => {
 
 export const create_boarder = async data => {
   let x;
-  data.api_key=api_key;
-  await axios.post(`${serverLink}/add_boarders`, data).then(
+   
+  await axios.post(`${ server_link}/add_boarders`, data).then(
     response => {
       x = response.data;
     },
@@ -31,8 +31,8 @@ export const create_boarder = async data => {
 
 export const update_boarder = async data => {
   let x;
-  data.api_key=api_key;
-  await axios.post(`${serverLink}/update_boarder`, data).then(
+   
+  await axios.post(`${ server_link}/update_boarder`, data).then(
     response => {
       x = response.data;
     },
@@ -45,8 +45,8 @@ export const update_boarder = async data => {
 
 export const delete_boarder = async data => {
   let x;
-  data.api_key=api_key;
-  await axios.post(`${serverLink}/delete_boarder`, data).then(
+   
+  await axios.post(`${ server_link}/delete_boarder`, data).then(
     response => {
       x = response.data;
     },

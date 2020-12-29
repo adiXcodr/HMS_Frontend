@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { Spin, Space, Table, Grid, Divider, Row, Col, Button, Radio, Input, DatePicker} from 'antd';
+import { Spin, Space, Table, Grid, Divider, Row, Col, Button, Radio, Input, DatePicker, Form} from 'antd';
 import "./style.css";
 import {get_all_boarders, create_boarder, update_boarder, delete_boarder} from '../api/boarders';
-import { PlusCircleOutlined } from '@ant-design/icons';
-import { Formik, Field, Form} from 'formik';
+import { PlusCircleOutlined , EditOutlined, DeleteOutlined} from '@ant-design/icons';
+import moment from 'moment';
 
 class Boarders extends Component {
   state={
@@ -22,7 +22,9 @@ class Boarders extends Component {
         dateOfBirth:"",
         address:"",
         roomNo:""
-      }
+      },
+    editDataFlag:false,
+    deleteDataFlag:false
   }
 
   setData = async () =>{
@@ -46,7 +48,7 @@ class Boarders extends Component {
         });
       });
     }
-   
+    
     const columns = [
       {
         title: 'Roll No',
@@ -98,14 +100,55 @@ class Boarders extends Component {
 
     this.setState({dataSource:dataSource,columns:columns,loading:false});
   };
-  onSubmitForm(data){
-    console.log(data);
-  }
+
+  onFinish = async values => {
+    let toSubmit ={
+      rollNo:values.rollNo,
+      first_name:values.first_name,
+      last_name:values.last_name,
+      phoneNumber:values.phoneNumber,
+      department:values.department,
+      programme:values.programme,
+      email:values.email,
+      dateOfBirth:moment(values.dateOfBirth).format('YYYY-MM-DD'),
+      address:values.address,
+      roomNo:values.roomNo
+    }
+    console.log(toSubmit)
+    let x='';
+    if(this.state.addDataFlag)
+       x = await create_boarder(toSubmit);
+    else if(this.state.editDataFlag)
+       x= await update_boarder(toSubmit);
+    window.location.reload();
+  };
+
+  onFinishDelete = async values => {
+    let toSubmit ={
+      rollNo:values.rollNo,
+    }
+    console.log(toSubmit)
+    let x='';
+    if(this.state.deleteDataFlag)
+       x = await delete_boarder(toSubmit);
+    window.location.reload();
+  };
+
   componentDidMount(){
     this.setData();
   }
   render() {
-    const {dataSource, columns, loading, addDataFlag} = this.state;
+    const {dataSource, columns, loading, addDataFlag, editDataFlag, deleteDataFlag} = this.state;
+    const layout = {
+      labelCol: { span: 8 },
+      wrapperCol: { span: 16 },
+    };
+    const tailLayout = {
+      wrapperCol: { offset: 8, span: 16 },
+    };
+    const onFinishFailed = errorInfo => {
+      console.log('Failed:', errorInfo);
+    };
     return (
         <div className="boarderContainer" >
           {loading?
@@ -122,56 +165,148 @@ class Boarders extends Component {
                   />
               </Row>
               
-                  {!addDataFlag?
+                  {!addDataFlag&&!editDataFlag&&!deleteDataFlag?
                     <Row align="middle" className="addRow">
-                       <Button type="primary" icon={<PlusCircleOutlined/>} align="middle" size={"large"} onClick={()=>this.setState({addDataFlag:true})} className="addDataButton"/>
+                      <Col >
+                            <Button type="primary" icon={<PlusCircleOutlined/>} align="middle" size={"large"} onClick={()=>this.setState({addDataFlag:true})} className="addDataButton"/>
+                       </Col>
+                       <Col style={{marginLeft:'5%'}}>
+                            <Button type="primary" icon={<EditOutlined/>} align="middle" size={"large"} onClick={()=>this.setState({editDataFlag:true})} className="editDataButton"/>
+                       </Col>
+                       <Col style={{marginLeft:'5%'}}>
+                            <Button type="primary" icon={<DeleteOutlined/>} align="middle" size={"large"} onClick={()=>this.setState({deleteDataFlag:true})} className="editDataButton"/>
+                       </Col>
                     </Row>
                     :
                     <Row align="middle" className="formikContainer">
-                        <Formik
-                            initialValues={this.state.formData}
-                            onSubmit={async (values) => {
-                              console.log(values);
-                            }}
-                          >
-                                <Form
+                         {deleteDataFlag?
+                              <Form
+                                  {...layout}
+                                  name="boarderForm"
                                   id="boarderForm"
-                              >
-                                    <label htmlFor="rollNo">Roll Number</label>
-                                      <Input id="rollNo" name="rollNo" required/>
-                                    
-                                    <label htmlFor="first_name">First Name</label>
-                                      <Input id="first_name" name="first_name" required/>
-                                    
-                                    <label htmlFor="last_name">Last Name</label>
-                                      <Input id="last_name" name="last_name" required/>
-                                    
-                                    <label htmlFor="phoneNumber">Phone</label>
-                                      <Input id="phoneNumber" name="phoneNumber" required/>
-                                    
-                                    <label htmlFor="department">Department</label>
-                                      <Input id="department" name="department" required/>
-                                    
-                                    <label htmlFor="programme">Programme</label>
-                                      <Input id="programme" name="programme" required/>
-                                    
-                                    <label htmlFor="email">Email</label>
-                                      <Input id="email" name="email" required/>
-                                    
-                                    <label htmlFor="dateOfBirth">DOB</label>
-                                      <DatePicker id="dateOfBirth" name="dateOfBirth" required style={{marginTop:20,marginBottom:10}}/>
-                                    <br></br>
-                                    <label htmlFor="address">Address</label>
-                                      <Input id="address" name="address" required/>
-                                    
-                                    <label htmlFor="roomNo">Room No</label>
-                                      <Input id="roomNo" name="roomNo" required/>
-                                    
-                                    <br></br>
-                                      <Button type="submit" htmlType="submit" form="boarderForm" style={{marginTop:30,marginBottom:50}}>Submit</Button>
-                                    
+                                  initialValues={{ remember: true }}
+                                  onFinish={this.onFinishDelete}
+                                  onFinishFailed={onFinishFailed}
+                                >
+                                <Form.Item
+                                          label="Roll No"
+                                          id="rollNo" 
+                                          name="rollNo"
+                                          rules={[{ required: true }]}
+                                          initialValue={this.state.formData.rollNo}
+                                      >
+                                          <Input />
+                                </Form.Item>
+                                <Form.Item {...tailLayout}>
+                                      <Button type="primary" htmlType="submit" form="boarderForm" style={{marginTop:30,marginBottom:50}}>Delete</Button>
+                                  </Form.Item>
                               </Form>
-                      </Formik>
+                              :
+                                <Form
+                                  {...layout}
+                                  name="boarderForm"
+                                  id="boarderForm"
+                                  initialValues={{ remember: true }}
+                                  onFinish={this.onFinish}
+                                  onFinishFailed={onFinishFailed}
+                                >
+                                      <Form.Item
+                                          label="Roll No"
+                                          id="rollNo" 
+                                          name="rollNo"
+                                          rules={[{ required: true }]}
+                                          initialValue={this.state.formData.rollNo}
+                                      >
+                                          <Input />
+                                      </Form.Item>
+                                      <Form.Item
+                                          label="First Name"
+                                          id="first_name" 
+                                          name="first_name"
+                                          rules={[{ required: true }]}
+                                          initialValue={this.state.formData.first_name}
+                                      >
+                                          <Input required/>
+                                      </Form.Item>
+                                      <Form.Item
+                                          label="Last Name"
+                                          id="last_name" 
+                                          name="last_name"
+                                          rules={[{ required: true }]}
+                                          initialValue={this.state.formData.last_name}
+                                      >
+                                          <Input required/>
+                                      </Form.Item>
+                                      <Form.Item
+                                          label="Phone"
+                                          id="phoneNumber" 
+                                          name="phoneNumber"
+                                          rules={[{ required: true }]}
+                                          initialValue={this.state.formData.phoneNumber}
+                                      >
+                                          <Input required/>
+                                      </Form.Item>
+                                      <Form.Item
+                                          label="Department"
+                                          id="department" 
+                                          name="department"
+                                          rules={[{ required: true}]}
+                                          initialValue={this.state.formData.department}
+                                      >
+                                          <Input/>
+                                      </Form.Item>
+                                      <Form.Item
+                                          label="Programme"
+                                          id="programme" 
+                                          name="programme"
+                                          rules={[{ required: true}]}
+                                          initialValue={this.state.formData.programme}
+                                      >
+                                          <Input />
+                                      </Form.Item>
+                                      <Form.Item
+                                          label="Email"
+                                          id="email" 
+                                          name="email"
+                                          rules={[{ required: true }]}
+                                          initialValue={this.state.formData.email}
+                                      >
+                                          <Input />
+                                      </Form.Item>
+                                      <Form.Item
+                                          label="DOB"
+                                          id="dateOfBirth" 
+                                          name="dateOfBirth"
+                                          rules={[{ required: true }]}
+                                          initialValue={this.state.formData.dateOfBirth}
+                                      >
+                                          <DatePicker/>
+                                      </Form.Item>
+                                      <Form.Item
+                                          label="Address"
+                                          id="address" 
+                                          name="address"
+                                          rules={[{ required: true }]}
+                                          initialValue={this.state.formData.address}
+                                      >
+                                          <Input />
+                                      </Form.Item>
+                                      <Form.Item
+                                          label="Room No"
+                                          id="roomNo" 
+                                          name="roomNo"
+                                          rules={[{ required: true }]}
+                                          initialValue={this.state.formData.roomNo}
+                                      >
+                                          <Input />
+                                      </Form.Item>
+                                    
+                                    <br></br>
+                                    <Form.Item {...tailLayout}>
+                                      <Button type="primary" htmlType="submit" form="boarderForm" style={{marginTop:30,marginBottom:50}}>{this.state.editDataFlag?'Edit':'Add'}</Button>
+                                    </Form.Item>
+                              </Form>
+                              }
                     </Row>
                 }
               

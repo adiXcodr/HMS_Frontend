@@ -16,8 +16,8 @@ export const get_all_rooms = async () => {
 
 export const create_room = async data => {
   let x;
-  data.api_key=api_key;
-  await axios.post(`${serverLink}/add_rooms`, data).then(
+   
+  await axios.post(`${ server_link}/add_rooms`, data).then(
     response => {
       x = response.data;
     },
@@ -30,8 +30,7 @@ export const create_room = async data => {
 
 export const update_room = async data => {
   let x;
-  data.api_key=api_key;
-  await axios.post(`${serverLink}/update_room`, data).then(
+  await axios.post(`${ server_link}/update_room`, data).then(
     response => {
       x = response.data;
     },
@@ -44,8 +43,8 @@ export const update_room = async data => {
 
 export const delete_room = async data => {
   let x;
-  data.api_key=api_key;
-  await axios.post(`${serverLink}/delete_room`, data).then(
+   
+  await axios.post(`${ server_link}/delete_room`, data).then(
     response => {
       x = response.data;
     },

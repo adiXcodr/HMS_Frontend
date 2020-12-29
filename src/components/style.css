@@ -20,3 +20,14 @@
     margin: 10px auto;
     margin-bottom: 50px !important;
 }
+
+.addRow{
+    position: relative;
+    width: 50% !important;
+    left:43.5% !important;
+}
+
+#floor{
+    position: relative;
+    left:5%;
+}
